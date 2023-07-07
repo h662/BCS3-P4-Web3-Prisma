@@ -3,8 +3,11 @@
 import axios from "axios";
 import { NextPage } from "next";
 import { FormEventHandler, useState } from "react";
-import { personal } from "./lib/client";
 import { v4 as uuidv4 } from "uuid";
+import Web3, { Personal } from "web3";
+
+const web3 = new Web3(window.ethereum);
+const personal = new Personal(window.ethereum);
 
 const Home: NextPage = () => {
   const [email, setEmail] = useState<string>("");
