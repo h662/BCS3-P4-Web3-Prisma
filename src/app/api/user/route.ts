@@ -3,7 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const POST = async (req: NextRequest) => {
   try {
-    const { account, email, signedToken } = await req.json();
+    const body = await req.json();
+    const { account, email, signedToken } = body;
 
     const user = await prisma.user.upsert({
       where: { account },
