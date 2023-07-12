@@ -2,17 +2,33 @@
 
 import axios from "axios";
 import { NextPage } from "next";
-import { FormEventHandler, useState } from "react";
+import { FormEventHandler, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { ethereum, personal, web3 } from "./lib/client";
 import MINT_NFT_ABI from "./lib/MINT_NFT_ABI.json";
 import MINT_NFT_BYTECODE from "./lib/MINT_NFT_BYTECODE";
+import ContractCard, { ContractCardProps } from "@/components/ContractCard";
 
 const Home: NextPage = () => {
   const [account, setAccount] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [symbol, setSymbol] = useState<string>("");
+  const [contracts, setContracts] = useState<ContractCardProps[]>();
+
+  const getContracts = async () => {
+    try {
+      const signedToken = localStorage.getItem("signedToken");
+
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_URL}/api/contract?signed-token=${signedToken}`
+      );
+
+      setContracts(response.data.contracts);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const onSubmitMetamask: FormEventHandler = async (e) => {
     try {
@@ -81,6 +97,7 @@ const Home: NextPage = () => {
             `${process.env.NEXT_PUBLIC_URL}/api/contract`,
             {
               address: deployRes["_address"],
+              signedToken,
             },
             {
               headers: {
@@ -96,6 +113,12 @@ const Home: NextPage = () => {
       console.error(error);
     }
   };
+
+  useEffect(() => {
+    if (!account) return;
+
+    getContracts();
+  }, [account]);
 
   return (
     <div className="bg-red-100 min-h-screen pt-10 pl-2">
@@ -130,6 +153,16 @@ const Home: NextPage = () => {
             value="스마트컨트랙트배포"
           />
         </form>
+        <ul>
+          {contracts?.map((v, i) => (
+            <ContractCard
+              key={i}
+              address={v.address}
+              user={v.user}
+              account={account}
+            />
+          ))}
+        </ul>
       </div>
     </div>
   );

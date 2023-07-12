@@ -7,6 +7,18 @@ export const GET = async (req: NextRequest) => {
 
     const signedToken = searchParams.get("signed-token");
 
+    if (!signedToken) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "Not exist token.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
     const user = await prisma.user.findFirst({
       where: {
         signedToken,
